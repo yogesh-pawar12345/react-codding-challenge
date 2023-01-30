@@ -1,4 +1,5 @@
-import { AnalysisModule } from "./analysis-module"
+import React from "react"
+import { AnalysisModule } from "./analysis-module.tsx"
 import { VehicleInfo } from "./VehiceInfo.tsx"
 import { VehicleDetails } from "./VehicleDetails.tsx"
 

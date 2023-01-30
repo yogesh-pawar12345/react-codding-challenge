@@ -1,3 +1,5 @@
+import React from "react"
+
 export const AnalysisModule = (props) => {
     return (
         <div className='second-component-div'>

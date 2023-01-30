@@ -1,176 +1,179 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
-import MainModule from './modules/mainModule';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import { IInfoObject, IMakeArrObj, IMakeObject, VehicleObject } from './model/index.tsx';
+import MainModule from "./modules/mainModule.tsx";
 
-interface IMakeObject {
-  make: string,
-  percentage: number
-}
-interface VehicleObject {
-  vehicle: string,
-  percentage: number
-}
-interface IMakeArrObj {
-  property: string,
-  items: number | string,
-  colorClass?: string,
-  percentage?: string
-}
-
-interface IInfoObject {
-  title: string,
-  info: string
-}
 const App = (): JSX.Element => {
-
   const [csvArray, setCsvArray] = useState([]);
-  const [makeObjectState, setMakeObjectState] = useState<IMakeObject[]>()
-  const [vehicleObjectState, setVehicleObjectState] = useState<VehicleObject[]>()
+  const [makeObjectState, setMakeObjectState] = useState<IMakeObject[]>();
+  const [vehicleObjectState, setVehicleObjectState] =
+    useState<VehicleObject[]>();
 
-  const [uniqueModelItems,setUniqueModelItems]=useState([])
+  const [uniqueModelItems, setUniqueModelItems] = useState([]);
   const loadData = () => {
-    fetch('./data.csv')
-      .then(response => response.text())
-      .then(responseText => {
-        processCSV(responseText)
-      })
+    fetch("./data.csv")
+      .then((response) => response.text())
+      .then((responseText) => {
+        processCSV(responseText);
+      });
   };
 
-
-  const processCSV = (str: string, delim: string = ',') => {
-    const headers = str.slice(0, str.indexOf('\n')).split(delim);
-    const rows = str.slice(str.indexOf('\n') + 1).split('\n');
-    const newArray: any[] = rows.map(row => {
-      const values:string[] = row.split(delim);
+  useEffect(() => {
+    loadData();
+  }, []);
+  
+  const processCSV = (str: string, delim: string = ",") => {
+    const headers = str.slice(0, str.indexOf("\n")).split(delim);
+    const rows = str.slice(str.indexOf("\n") + 1).split("\n");
+    const newArray: any[] = rows.map((row) => {
+      const values: string[] = row.split(delim);
       const eachObject = headers.reduce((obj, header, i) => {
         obj[header] = values[i];
         return obj;
-      }, {})
+      }, {});
       return eachObject;
-    })
+    });
 
-    const cuttedArray = newArray
-   
-      //calculate unique model values
-      const data:any = [...new Set(cuttedArray.map(item => item.Model))];
-      setUniqueModelItems(data.length)
-//calculate vehicle class data
-const vehicleClassData:any[] = cuttedArray.map(item => item.Vehicle_Class);
-const uniqueVehicleClassItems: string[] = [...new Set(cuttedArray.map(item => item.Vehicle_Class))];  
-const totalVehicleClassItems:number = vehicleClassData.length;
-console.log("vehice",totalVehicleClassItems);
+    const cuttedArray = newArray;
 
-const VehicleObject :VehicleObject[] = [];
-uniqueVehicleClassItems.forEach((currEle: string) => {
-  const numItems:string[] = vehicleClassData.filter(ele => ele === currEle)
-  VehicleObject.push({ vehicle: currEle, percentage: Number(Math.round(numItems.length * 100 / totalVehicleClassItems)) })
-})
-//sort data by descending order
-VehicleObject.sort((a, b) => {
-  return b.percentage - a.percentage;
-});
-//calculate make other percentage
-const otherVehiclePercentage:number = VehicleObject.slice(3).reduce((accumulator, currentValue) => {
-  return accumulator + currentValue.percentage
-}, 0)
+    //calculate unique model values
+    const data: any = [...new Set(cuttedArray.map((item) => item.Model))];
+    setUniqueModelItems(data.length);
 
-const tempArray:any[] = VehicleObject.slice(0, 2)
+    //calculate vehicle class data
+    const vehicleClassData: any[] = cuttedArray.map(
+      (item) => item.Vehicle_Class
+    );
+    const uniqueVehicleClassItems: string[] = [
+      ...new Set(cuttedArray.map((item) => item.Vehicle_Class)),
+    ];
+    const totalVehicleClassItems: number = vehicleClassData.length;
+    const VehicleObject: VehicleObject[] = [];
+    uniqueVehicleClassItems.forEach((currEle: string) => {
+      const numItems: string[] = vehicleClassData.filter(
+        (ele) => ele === currEle
+      );
+      VehicleObject.push({
+        vehicle: currEle,
+        percentage: Number(
+          Math.round((numItems.length * 100) / totalVehicleClassItems)
+        ),
+      });
+    });
+    //sort data by descending order
+    VehicleObject.sort((a, b) => {
+      return b.percentage - a.percentage;
+    });
+    //calculate make other percentage
+    console.log("other",VehicleObject)
+    const otherVehiclePercentage: number = VehicleObject.slice(3).reduce(
+      (accumulator, currentValue) => {
+        return accumulator + currentValue.percentage;
+      },
+      0
+    );
 
-tempArray.push({ vehicle: 'Others', percentage: otherVehiclePercentage })
-setVehicleObjectState(tempArray)
-      //calculate make data
-      const makeArray:any[] = cuttedArray.map(item => item.Make)
-      const uniqueItems: string[] = [...new Set(cuttedArray.map(item => item.Make))];  
-    const totalItems:number = makeArray.length;
+    const tempArray: any[] = VehicleObject.slice(0, 2);
+
+    tempArray.push({ vehicle: "Others", percentage: otherVehiclePercentage });
+    setVehicleObjectState(tempArray);
+    //calculate make data
+    const makeArray: any[] = cuttedArray.map((item) => item.Make);
+    const uniqueItems: string[] = [
+      ...new Set(cuttedArray.map((item) => item.Make)),
+    ];
+    const totalItems: number = makeArray.length;
     const makeObject: IMakeObject[] = [];
     uniqueItems.forEach((currEle: string) => {
-      const numItems:string[] = makeArray.filter(ele => ele === currEle)
-      makeObject.push({ make: currEle, percentage: Number(Math.round(numItems.length * 100 / totalItems)) })
-    })
-//sort data by descending order
+      const numItems: string[] = makeArray.filter((ele) => ele === currEle);
+      makeObject.push({
+        make: currEle,
+        percentage: Number(Math.round((numItems.length * 100) / totalItems)),
+      });
+    });
+    //sort data by descending order
     makeObject.sort((a, b) => {
       return b.percentage - a.percentage;
     });
-//calculate make other percentage
-    const otherPercentage:number = makeObject.slice(3).reduce((accumulator, currentValue) => {
-      return accumulator + currentValue.percentage
-    }, 0)
+    //calculate make other percentage
+    const otherPercentage: number = makeObject
+      .slice(3)
+      .reduce((accumulator, currentValue) => {
+        return accumulator + currentValue.percentage;
+      }, 0);
 
-    const arr:any[] = makeObject.slice(0, 2)
-   
-    arr.push({ make: 'Others', percentage: otherPercentage })
-    setMakeObjectState(arr)
+    const arr: any[] = makeObject.slice(0, 2);
 
-  }
+    arr.push({ make: "Others", percentage: otherPercentage });
+    setMakeObjectState(arr);
+  };
 
-  useEffect(() => {
-    loadData()
-  }, [])
+ 
 
   const makeInfoObject: IInfoObject = {
     title: "Make",
-    info: "Company of the vehicle"
-  }
+    info: "Company of the vehicle",
+  };
   const modelInfoObject: IInfoObject = {
     title: "Model",
-    info: "Car model"
-  }
+    info: "Car model",
+  };
   const classInfoObject: IInfoObject = {
     title: "Vehicle class",
-    info: "Class of vehicle depending on their utility, capacity and weight"
-  }
+    info: "Class of vehicle depending on their utility, capacity and weight",
+  };
   const makeArrObj: IMakeArrObj[] = [
     {
-      property: 'Valid',
+      property: "Valid",
       items: 6788,
-      colorClass: 'box bg-green',
-      percentage: '100 %'
+      colorClass: "box bg-green",
+      percentage: "100 %",
     },
     {
-      property: 'Mismatched',
+      property: "Mismatched",
       items: 0,
-      colorClass: 'box bg-orange',
-      percentage: '0 %'
+      colorClass: "box bg-orange",
+      percentage: "0 %",
     },
     {
-      property: 'Missing',
+      property: "Missing",
       items: 0,
-      colorClass: 'box bg-red',
-      percentage: '0'
+      colorClass: "box bg-red",
+      percentage: "0",
     },
     {
-      property: 'Unique',
+      property: "Unique",
       items: 67,
     },
     {
-      property: 'Most Common',
-      items: 'FORD',
-      percentage: '9 %'
-    }
-  ]
+      property: "Most Common",
+      items: "FORD",
+      percentage: "9 %",
+    },
+  ];
 
   const mainArray = [
     {
       info: makeInfoObject,
       makeObjectState,
-      makeArrObj
+      makeArrObj,
     },
     {
       info: modelInfoObject,
       uniqueModelItems,
-      makeArrObj
+      makeArrObj,
     },
     {
       info: classInfoObject,
       vehicleObjectState,
-      makeArrObj
-    }
-  ]
+      makeArrObj,
+    },
+  ];
   return (
-    <div className='main-div'>
+    <div className="main-div">
       <MainModule mainArray={mainArray} />
-    </ div>
+    </div>
   );
-}
+};
 
 export default App;
