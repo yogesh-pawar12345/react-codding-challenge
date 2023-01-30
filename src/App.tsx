@@ -6,7 +6,10 @@ interface IMakeObject {
   make: string,
   percentage: number
 }
-
+interface VehicleObject {
+  vehicle: string,
+  percentage: number
+}
 interface IMakeArrObj {
   property: string,
   items: number | string,
@@ -22,6 +25,8 @@ const App = (): JSX.Element => {
 
   const [csvArray, setCsvArray] = useState([]);
   const [makeObjectState, setMakeObjectState] = useState<IMakeObject[]>()
+  const [vehicleObjectState, setVehicleObjectState] = useState<VehicleObject[]>()
+
   const [uniqueModelItems,setUniqueModelItems]=useState([])
   const loadData = () => {
     fetch('./data.csv')
@@ -45,28 +50,54 @@ const App = (): JSX.Element => {
     })
 
     const cuttedArray = newArray
-    const makeArray:any[] = cuttedArray.map(item => item.Make)
-    const uniqueItems: string[] = [...new Set(cuttedArray.map(item => item.Make))];
-    
-     const data:any = [...new Set(cuttedArray.map(item => item.Model))];
-     setUniqueModelItems(data.length)
-    console.log("unique item",uniqueModelItems)
+   
+      //calculate unique model values
+      const data:any = [...new Set(cuttedArray.map(item => item.Model))];
+      setUniqueModelItems(data.length)
+//calculate vehicle class data
+const vehicleClassData:any[] = cuttedArray.map(item => item.Vehicle_Class);
+const uniqueVehicleClassItems: string[] = [...new Set(cuttedArray.map(item => item.Vehicle_Class))];  
+const totalVehicleClassItems:number = vehicleClassData.length;
+console.log("vehice",totalVehicleClassItems);
+
+const VehicleObject :VehicleObject[] = [];
+uniqueVehicleClassItems.forEach((currEle: string) => {
+  const numItems:string[] = vehicleClassData.filter(ele => ele === currEle)
+  VehicleObject.push({ vehicle: currEle, percentage: Number(Math.round(numItems.length * 100 / totalVehicleClassItems)) })
+})
+//sort data by descending order
+VehicleObject.sort((a, b) => {
+  return b.percentage - a.percentage;
+});
+//calculate make other percentage
+const otherVehiclePercentage:number = VehicleObject.slice(3).reduce((accumulator, currentValue) => {
+  return accumulator + currentValue.percentage
+}, 0)
+
+const tempArray:any[] = VehicleObject.slice(0, 2)
+
+tempArray.push({ vehicle: 'Others', percentage: otherVehiclePercentage })
+setVehicleObjectState(tempArray)
+      //calculate make data
+      const makeArray:any[] = cuttedArray.map(item => item.Make)
+      const uniqueItems: string[] = [...new Set(cuttedArray.map(item => item.Make))];  
     const totalItems:number = makeArray.length;
     const makeObject: IMakeObject[] = [];
     uniqueItems.forEach((currEle: string) => {
       const numItems:string[] = makeArray.filter(ele => ele === currEle)
       makeObject.push({ make: currEle, percentage: Number(Math.round(numItems.length * 100 / totalItems)) })
     })
-
+//sort data by descending order
     makeObject.sort((a, b) => {
       return b.percentage - a.percentage;
     });
-
+//calculate make other percentage
     const otherPercentage:number = makeObject.slice(3).reduce((accumulator, currentValue) => {
       return accumulator + currentValue.percentage
     }, 0)
 
     const arr:any[] = makeObject.slice(0, 2)
+   
     arr.push({ make: 'Others', percentage: otherPercentage })
     setMakeObjectState(arr)
 
@@ -131,13 +162,12 @@ const App = (): JSX.Element => {
     },
     {
       info: classInfoObject,
-      makeObjectState,
+      vehicleObjectState,
       makeArrObj
     }
   ]
   return (
     <div className='main-div'>
-      {uniqueModelItems.length}
       <MainModule mainArray={mainArray} />
     </ div>
   );
