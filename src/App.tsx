@@ -22,6 +22,7 @@ const App = (): JSX.Element => {
 
   const [csvArray, setCsvArray] = useState([]);
   const [makeObjectState, setMakeObjectState] = useState<IMakeObject[]>()
+  const [uniqueModelItems,setUniqueModelItems]=useState([])
   const loadData = () => {
     fetch('./data.csv')
       .then(response => response.text())
@@ -34,10 +35,8 @@ const App = (): JSX.Element => {
   const processCSV = (str: string, delim: string = ',') => {
     const headers = str.slice(0, str.indexOf('\n')).split(delim);
     const rows = str.slice(str.indexOf('\n') + 1).split('\n');
-console.log("rows",rows)
     const newArray: any[] = rows.map(row => {
       const values:string[] = row.split(delim);
-      console.log("values",values)
       const eachObject = headers.reduce((obj, header, i) => {
         obj[header] = values[i];
         return obj;
@@ -48,9 +47,12 @@ console.log("rows",rows)
     const cuttedArray = newArray
     const makeArray:any[] = cuttedArray.map(item => item.Make)
     const uniqueItems: string[] = [...new Set(cuttedArray.map(item => item.Make))];
-    console.log("unique item",uniqueItems)
-    const totalItems:number = makeArray.length
-    const makeObject: IMakeObject[] = []
+    
+     const data:any = [...new Set(cuttedArray.map(item => item.Model))];
+     setUniqueModelItems(data.length)
+    console.log("unique item",uniqueModelItems)
+    const totalItems:number = makeArray.length;
+    const makeObject: IMakeObject[] = [];
     uniqueItems.forEach((currEle: string) => {
       const numItems:string[] = makeArray.filter(ele => ele === currEle)
       makeObject.push({ make: currEle, percentage: Number(Math.round(numItems.length * 100 / totalItems)) })
@@ -124,7 +126,7 @@ console.log("rows",rows)
     },
     {
       info: modelInfoObject,
-      makeObjectState,
+      uniqueModelItems,
       makeArrObj
     },
     {
@@ -135,6 +137,7 @@ console.log("rows",rows)
   ]
   return (
     <div className='main-div'>
+      {uniqueModelItems.length}
       <MainModule mainArray={mainArray} />
     </ div>
   );

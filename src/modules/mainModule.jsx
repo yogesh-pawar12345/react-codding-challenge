@@ -8,7 +8,7 @@ const MainModule =(props)=>{
             <div className='first-div'>
             <VehicleInfo info={ele.info} />
             <div className='main-component-div'>
-              <VehicleDetails makeObjectState={ele.makeObjectState} />
+              <VehicleDetails makeObjectState={ele.makeObjectState} uniqueModelItems={ele.uniqueModelItems??ele.uniqueModelItems} />
               <AnalysisModule makeArrObj={ele.makeArrObj} />
             </div>
           </div>

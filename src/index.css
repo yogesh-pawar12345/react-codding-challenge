@@ -58,7 +58,7 @@ code {
 }
 
 .border-line {
-  border-bottom: 15px solid aqua;
+  border-bottom: 15px solid rgb(111, 255, 0);
 }
 
 .box{
@@ -67,7 +67,10 @@ code {
 }
 
 .bg-green{
-  background-color: aqua;
+  background-color: rgb(34, 255, 0);
+}
+.text-green{
+  color: aqua;
 }
 
 .bg-orange{
